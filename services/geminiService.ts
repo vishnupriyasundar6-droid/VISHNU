@@ -1,24 +1,30 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Initialization according to guidelines
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 
 export async function getNarrativeComment(
   currentPos: number, 
   diceRoll: number, 
   event: 'none' | 'snake' | 'ladder' | 'win'
 ): Promise<string> {
+  // Guard against missing key
+  if (!process.env.API_KEY) {
+    return "The cosmos is silent, but your path remains clear.";
+  }
+
   const model = 'gemini-3-flash-preview';
   
   let prompt = '';
   if (event === 'win') {
-    prompt = `The player just reached square 100 and won Celestial Snakes and Ladders! Give a short, epic victory shout.`;
+    prompt = `The player reached square 100 and won! Give a short, epic victory shout. Max 10 words.`;
   } else if (event === 'snake') {
-    prompt = `The player rolled a ${diceRoll} and hit a COSMIC SNAKE on square ${currentPos}! Give a short, witty, slightly teasing comment about their misfortune. Max 15 words.`;
+    prompt = `The player rolled a ${diceRoll} and hit a cosmic void (snake) at square ${currentPos}! Witty teasing comment. Max 12 words.`;
   } else if (event === 'ladder') {
-    prompt = `The player rolled a ${diceRoll} and climbed a STAR LADDER! Give a short, encouraging, magical comment about their luck. Max 15 words.`;
+    prompt = `The player rolled a ${diceRoll} and entered a star portal (ladder) at square ${currentPos}! Magical encouraging comment. Max 12 words.`;
   } else {
-    prompt = `The player is on square ${currentPos} after rolling a ${diceRoll}. Give a short, mystical observation about their journey. Max 10 words.`;
+    prompt = `The player is at square ${currentPos} after rolling a ${diceRoll}. Short mystical journey observation. Max 8 words.`;
   }
 
   try {
@@ -26,13 +32,12 @@ export async function getNarrativeComment(
       model,
       contents: prompt,
       config: {
-        temperature: 0.8,
-        topP: 0.95,
+        temperature: 0.9,
       }
     });
-    return response.text?.trim() || "The stars watch your every step...";
+    return response.text?.trim() || "Fate shifts with your progress.";
   } catch (error) {
-    console.error("Gemini Error:", error);
-    return "Fate moves in mysterious ways.";
+    console.error("Gemini Oracle Error:", error);
+    return "The stars are shifting...";
   }
 }
